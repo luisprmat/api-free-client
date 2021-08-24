@@ -44,13 +44,43 @@ class AuthenticatedSessionController extends Controller
             'password' => $request->password
         ]);
 
-        $response = $response->json();
+        if ($response->status() == 404) {
+            return back()->withErrors($response->json()['message']);
+        }
+
+        $service = $response->json();
 
         $user = User::updateOrCreate([
             'email' => $request->email
-        ], $response['data']);
+        ], $service['data']);
 
-        return $user;
+        if (! $user->accessToken) {
+            $response = Http::withOptions([
+                'verify' => false
+            ])->withHeaders([
+                'Accept' => 'application/json'
+            ])->post('https://free-api.dev/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => ' 943b25b1-2b07-44a9-a663-cea542b7575e',
+                'client_secret' => 'dJRMTCXX7bHlOrxq1D4unQ9kQugW9JO0p8NnKmRY',
+                'username' => $request->email,
+                'password' => $request->password
+            ]);
+
+            $access_token = $response->json();
+
+            $user->accessToken()->create([
+                'service_id' => $service['data']['id'],
+                'access_token' => $access_token['access_token'],
+                'refresh_token' => $access_token['refresh_token'],
+                'expires_at' => now()->addSecond($access_token['expires_in'])
+            ]);
+        }
+
+        Auth::login($user, $request->remember);
+
+        return redirect()->intended(RouteServiceProvider::HOME);
+
         // $request->authenticate();
 
         // $request->session()->regenerate();
