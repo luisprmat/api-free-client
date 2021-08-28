@@ -11,6 +11,8 @@ class PostController extends Controller
     {
         $url = config('services.api_free.url');
 
+        $this->resolveAutorization();
+
         $response = Http::withOptions([
             'verify' => false
         ])->withHeaders([
