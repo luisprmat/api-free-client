@@ -36,6 +36,8 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
+        $url = config('services.api_free.url');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -46,7 +48,7 @@ class RegisteredUserController extends Controller
             'verify' => false
         ])->withHeaders([
             'Accept' => 'application/json'
-        ])->post('https://free-api.dev/v1/register', $request->all());
+        ])->post($url . '/v1/register', $request->all());
 
         if ($response->status() == 422) {
             return back()->withErrors($response->json()['errors']);

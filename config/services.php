@@ -33,6 +33,7 @@ return [
     'api_free' => [
         'client_id' => env('API_FREE_CLIENT_ID'),
         'client_secret' => env('API_FREE_CLIENT_SECRET'),
+        'url' => env('API_FREE_URL'),
     ]
 
 ];

@@ -33,6 +33,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request)
     {
+        $url = config('services.api_free.url');
+
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string'
@@ -42,7 +44,7 @@ class AuthenticatedSessionController extends Controller
             'verify' => false
         ])->withHeaders([
             'Accept' => 'application/json'
-        ])->post('https://free-api.dev/v1/login', [
+        ])->post($url . '/v1/login', [
             'email' => $request->email,
             'password' => $request->password
         ]);

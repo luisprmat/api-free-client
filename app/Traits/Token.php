@@ -8,11 +8,13 @@ trait Token
 {
     public function getAccessToken($user, $service)
     {
+        $url = config('services.api_free.url');
+
         $response = Http::withOptions([
             'verify' => false
         ])->withHeaders([
             'Accept' => 'application/json'
-        ])->post('https://free-api.dev/oauth/token', [
+        ])->post($url . '/oauth/token', [
             'grant_type' => 'password',
             'client_id' => config('services.api_free.client_id'),
             'client_secret' => config('services.api_free.client_secret'),
