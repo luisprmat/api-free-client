@@ -61,8 +61,8 @@ class AuthenticatedSessionController extends Controller
                 'Accept' => 'application/json'
             ])->post('https://free-api.dev/oauth/token', [
                 'grant_type' => 'password',
-                'client_id' => ' 943b25b1-2b07-44a9-a663-cea542b7575e',
-                'client_secret' => 'dJRMTCXX7bHlOrxq1D4unQ9kQugW9JO0p8NnKmRY',
+                'client_id' => config('services.api_free.client_id'),
+                'client_secret' => config('services.api_free.client_secret'),
                 'username' => $request->email,
                 'password' => $request->password
             ]);

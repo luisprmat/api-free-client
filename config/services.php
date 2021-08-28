@@ -30,4 +30,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'api_free' => [
+        'client_id' => env('API_FREE_CLIENT_ID'),
+        'client_secret' => env('API_FREE_CLIENT_SECRET'),
+    ]
+
 ];
