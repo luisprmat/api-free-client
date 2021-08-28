@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -39,10 +40,42 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $response = Http::withOptions([
+            'verify' => false
+        ])->withHeaders([
+            'Accept' => 'application/json'
+        ])->post('https://free-api.dev/v1/register', $request->all());
+
+        if ($response->status() == 422) {
+            return back()->withErrors($response->json()['errors']);
+        }
+
+        $service = $response->json();
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+        ]);
+
+        $response = Http::withOptions([
+            'verify' => false
+        ])->withHeaders([
+            'Accept' => 'application/json'
+        ])->post('https://free-api.dev/oauth/token', [
+            'grant_type' => 'password',
+            'client_id' => ' 943b25b1-2b07-44a9-a663-cea542b7575e',
+            'client_secret' => 'dJRMTCXX7bHlOrxq1D4unQ9kQugW9JO0p8NnKmRY',
+            'username' => $request->email,
+            'password' => $request->password
+        ]);
+
+        $access_token = $response->json();
+
+        $user->accessToken()->create([
+            'service_id' => $service['data']['id'],
+            'access_token' => $access_token['access_token'],
+            'refresh_token' => $access_token['refresh_token'],
+            'expires_at' => now()->addSecond($access_token['expires_in'])
         ]);
 
         event(new Registered($user));
