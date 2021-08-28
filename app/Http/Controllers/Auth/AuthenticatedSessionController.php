@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Providers\RouteServiceProvider;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Traits\Token;
 
 class AuthenticatedSessionController extends Controller
 {
+    use Token;
+
     /**
      * Display the login view.
      *
@@ -55,26 +58,7 @@ class AuthenticatedSessionController extends Controller
         ], $service['data']);
 
         if (! $user->accessToken) {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Accept' => 'application/json'
-            ])->post('https://free-api.dev/oauth/token', [
-                'grant_type' => 'password',
-                'client_id' => config('services.api_free.client_id'),
-                'client_secret' => config('services.api_free.client_secret'),
-                'username' => $request->email,
-                'password' => $request->password
-            ]);
-
-            $access_token = $response->json();
-
-            $user->accessToken()->create([
-                'service_id' => $service['data']['id'],
-                'access_token' => $access_token['access_token'],
-                'refresh_token' => $access_token['refresh_token'],
-                'expires_at' => now()->addSecond($access_token['expires_in'])
-            ]);
+            $this->getAccessToken($user, $service);
         }
 
         Auth::login($user, $request->remember);
