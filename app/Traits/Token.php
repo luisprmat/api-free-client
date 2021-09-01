@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 trait Token
 {
-    public function getAccessToken($user, $service)
+    public function setAccessToken($user, $service)
     {
         $url = config('services.api_free.url');
 
@@ -19,7 +19,8 @@ trait Token
             'client_id' => config('services.api_free.client_id'),
             'client_secret' => config('services.api_free.client_secret'),
             'username' => request('email'),
-            'password' => request('password')
+            'password' => request('password'),
+            'scope' => 'create-post read-post update-post delete-post'
         ]);
 
         $access_token = $response->json();
